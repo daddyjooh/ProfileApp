@@ -1,24 +1,16 @@
 package com.example.profileapp;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,20 +19,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.annotations.Nullable;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -58,10 +43,8 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference databaseReference;
     FirebaseStorage firebaseStorage;
     StorageReference storageReference;
-    String storagepath = "Users_Profile_Cover_image/";
-    String uid;
     ImageView set;
-    TextView profilepic, editname, editpassword;
+    TextView profilepic;
     ProgressDialog pd;
     private static final int CAMERA_REQUEST = 100;
     private static final int STORAGE_REQUEST = 200;
@@ -77,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         profilepic = findViewById(R.id.profilepic);
         set = findViewById(R.id.setting_profile_image);
         pd = new ProgressDialog(this);
@@ -88,13 +73,12 @@ public class MainActivity extends AppCompatActivity {
         databaseReference = firebaseDatabase.getReference("Users");
         cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        profilepic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pd.setMessage("Updating Profile Picture");
-                profileOrCoverPhoto = "image";
-                showImagePicDialog();
-            }
+
+
+        profilepic.setOnClickListener(v -> {
+            pd.setMessage("Updating Profile Picture");
+            profileOrCoverPhoto = "image";
+            showImagePicDialog();
         });
 
     }
@@ -135,22 +119,19 @@ public class MainActivity extends AppCompatActivity {
         String options[] = {"Camera", "Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Pick Image From");
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // if access is not given then we will request for permission
-                if (which == 0) {
-                    if (!checkCameraPermission()) {
-                        requestCameraPermission();
-                    } else {
-                        pickFromCamera();
-                    }
-                } else if (which == 1) {
-                    if (!checkStoragePermission()) {
-                        requestStoragePermission();
-                    } else {
-                        pickFromGallery();
-                    }
+        builder.setItems(options, (dialog, which) -> {
+            // if access is not given then we will request for permission
+            if (which == 0) {
+                if (!checkCameraPermission()) {
+                    requestCameraPermission();
+                } else {
+                    pickFromCamera();
+                }
+            } else if (which == 1) {
+                if (!checkStoragePermission()) {
+                    requestStoragePermission();
+                } else {
+                    pickFromGallery();
                 }
             }
         });
@@ -272,19 +253,13 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseStorage storage = FirebaseStorage.getInstance();
                 long time = new Date().getTime();
                 StorageReference reference = storage.getReference().child("Profiles").child(time + "");
-                reference.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    String filePath = uri.toString();
-                                    HashMap<String, Object> obj = new HashMap<>();
-                                    obj.put("image", filePath);
-                                }
-                            });
-                        }
+                reference.putFile(uri).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        reference.getDownloadUrl().addOnSuccessListener(uri1 -> {
+                            String filePath = uri1.toString();
+                            HashMap<String, Object> obj = new HashMap<>();
+                            obj.put("image", filePath);
+                        });
                     }
                 });
                 set.setImageURI(data.getData());
