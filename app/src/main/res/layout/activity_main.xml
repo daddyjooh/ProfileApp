@@ -12,6 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
         android:text="Edit Profile Picture"
+        android:id="@+id/id"
+        android:textStyle="bold"
         android:textAlignment="center"
         android:textColor="@android:color/black"
         android:textSize="26sp" />
@@ -24,16 +26,15 @@
         android:layout_marginTop="40dp"
         android:src="@drawable/user" />
 
-    <TextView
-        android:id="@+id/profilepic"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Update Profile Pic"
-        android:textAlignment="center"
-        android:textColor="@android:color/black"
-        android:textSize="20sp" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:text="UPDATE PROFILE"
+        android:id="@+id/button"
+        android:textSize="20sp" />
 
 
 </LinearLayout>
